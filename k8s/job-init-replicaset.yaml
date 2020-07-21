@@ -1,0 +1,49 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-db-cm
+data:
+  replicaset.js: |
+    rs.initiate({ _id: "rs0", version: 1, members: [
+      { _id: 0, host: "mongo-replicaset-0.mongo.tfm.svc.cluster.local:27017" },
+      { _id: 1, host: "mongo-replicaset-1.mongo.tfm.svc.cluster.local:27017" },
+      { _id: 2, host: "mongo-replicaset-2.mongo.tfm.svc.cluster.local:27017" }
+     ] });
+    rs.status();
+    sleep(2000);
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  init-replicaset
+spec:
+  template:
+    metadata:
+      name:  init-replicaset
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: mongo
+        image: mongo:4.2
+        command: ['mongo','--verbose', '--host', 'mongo-replicaset-0.mongo.tfm.svc.cluster.local', '/init/replicaset.js']
+        volumeMounts:
+          - mountPath: /init
+            name: mongo-db-cm-config
+      initContainers:
+      - name: wait-dependencies-ready
+        image: busybox
+        command: ['sh', '-c', "until nc -zv -w 1 mongo-replicaset-2.mongo.tfm.svc.cluster.local 27017; \
+                                    do echo 'waiting for replica 2 to be ready...'; \
+                                    sleep 1; \
+                               done; "]
+      volumes:
+      - name: mongo-db-cm-config
+        configMap:
+          name: mongo-db-cm
+          items:
+          - key: replicaset.js
+            path: replicaset.js
+            mode: 0555

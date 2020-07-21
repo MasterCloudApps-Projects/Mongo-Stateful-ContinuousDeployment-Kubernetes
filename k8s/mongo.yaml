@@ -1,0 +1,54 @@
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  ports:
+  - port: 17017
+    name: mongo
+  clusterIP: None
+  selector:
+    app: mongo
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-replicaset
+  namespace: tfm
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  serviceName: mongo
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mongo
+        image: mongo:4.2
+        args: ['--replSet', 'rs0']
+        ports:
+          - containerPort: 17017
+            name: mongo
+        volumeMounts:
+          - name:  mongodata
+            mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodata
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: 1Gi
