@@ -8,7 +8,7 @@ metadata:
     app: mongo
 spec:
   ports:
-  - port: 17017
+  - port: 27017
     name: mongo
   clusterIP: None
   selector:
@@ -38,7 +38,7 @@ spec:
         image: mongo:4.2
         args: ['--replSet', 'rs0']
         ports:
-          - containerPort: 17017
+          - containerPort: 27017
             name: mongo
         volumeMounts:
           - name:  mongodata
