@@ -36,7 +36,7 @@ consumeTwitter = async () => {
   }, 1000)
 }
 
-const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/twitterreplicaSet=rs0'
+const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/twitter?replicaSet=rs0'
 
 startup = async () => {
   try{

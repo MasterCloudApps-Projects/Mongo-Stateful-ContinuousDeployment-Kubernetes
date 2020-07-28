@@ -43,6 +43,22 @@ spec:
         volumeMounts:
           - name:  mongodata
             mountPath: /data/db
+          - name:  healthcheck
+            mountPath: /healthcheck
+        livenessProbe:
+          exec:
+            command:
+            - /healthcheck/replicaset-healthcheck.sh
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: healthcheck
+        configMap:
+          name: healthcheck-cm
+          items:
+          - key: replicaset-healthcheck.sh
+            path: replicaset-healthcheck.sh
+            mode: 0555
   volumeClaimTemplates:
   - metadata:
       name: mongodata

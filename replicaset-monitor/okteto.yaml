@@ -1,0 +1,15 @@
+
+name: replicaset-monitor-dev
+image: okteto/node:12
+workdir: /okteto
+command: ["bash"]
+#volumes:
+#  - /root/.vscode-server    # persist vscode extensions
+securityContext:
+  capabilities:
+    add:
+    - SYS_PTRACE            # required by the go debugger
+forward:
+  - 8080:8080
+#persistentVolume:
+#  enabled: true
