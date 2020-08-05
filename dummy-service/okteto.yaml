@@ -1,5 +1,5 @@
 
-name: twitter-service-dev
+name: dummy-service-dev
 image: okteto/node:12
 workdir: /okteto
 command: ["bash"]

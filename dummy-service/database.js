@@ -27,7 +27,7 @@ async function tryConnect(url, attempts) {
 }
 
 exports.insertOne = async (document) => {
-   await _db.collection("tweets").insertOne(document)
+   await _db.collection("dummy").insertOne(document)
 }
 
 exports.connect = (url) => {

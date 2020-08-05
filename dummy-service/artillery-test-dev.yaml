@@ -1,0 +1,15 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - arrivalRate: 300
+scenarios:
+  - flow:
+      - post:
+          url: "/"
+          json:
+            attr1: "attr1"
+            attr2: "attr2"
+            attr3: "attr3"
+            attr4: "attr4"
+            attr5: "attr5"
+            attr6: "attr6"
