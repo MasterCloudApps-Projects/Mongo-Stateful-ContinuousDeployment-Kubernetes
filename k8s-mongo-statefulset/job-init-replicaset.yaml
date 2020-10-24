@@ -5,13 +5,19 @@ metadata:
   name: mongo-db-cm
 data:
   replicaset.js: |
-    rs.initiate({ _id: "rs0", version: 1, members: [
-      { _id: 0, host: "mongo-replicaset-0.mongo.tfm.svc.cluster.local:27017" },
-      { _id: 1, host: "mongo-replicaset-1.mongo.tfm.svc.cluster.local:27017" },
-      { _id: 2, host: "mongo-replicaset-2.mongo.tfm.svc.cluster.local:27017" }
+    rs.initiate({ _id: "mongo", version: 1, members: [
+      { _id: 0, host: "mongo-0.mongo-svc.tfm.svc.cluster.local:27017" },
+      { _id: 1, host: "mongo-1.mongo-svc.tfm.svc.cluster.local:27017" },
+      { _id: 2, host: "mongo-2.mongo-svc.tfm.svc.cluster.local:27017" }
      ] });
-    rs.status();
+     rs.status();
     sleep(2000);
+    db.createUser( { user: "my-user",
+              pwd: "test",
+              roles: [ { role: "clusterAdmin", db: "admin" },
+                      { role: "readAnyDatabase", db: "admin" },
+                      { role: "readWriteAnyDatabase", db: "admin" }]
+                });
 
 ---
 
@@ -28,14 +34,14 @@ spec:
       containers:
       - name: mongo
         image: mongo:4.2
-        command: ['mongo','--verbose', '--host', 'mongo-replicaset-0.mongo.tfm.svc.cluster.local', '/init/replicaset.js']
+        command: ['mongo','--verbose', '--host', 'mongo-svc.tfm.svc.cluster.local', 'admin', '/init/replicaset.js']
         volumeMounts:
           - mountPath: /init
             name: mongo-db-cm-config
       initContainers:
       - name: wait-dependencies-ready
         image: busybox
-        command: ['sh', '-c', "until nc -zv -w 1 mongo-replicaset-2.mongo.tfm.svc.cluster.local 27017; \
+        command: ['sh', '-c', "until nc -zv -w 1 mongo-2.mongo-svc.tfm.svc.cluster.local 27017; \
                                     do echo 'waiting for replica 2 to be ready...'; \
                                     sleep 1; \
                                done; "]

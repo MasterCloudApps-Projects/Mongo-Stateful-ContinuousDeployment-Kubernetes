@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: grafana-cert
+  namespace: monitoring
+spec:
+  commonName: grafana.mca.ethcero.es
+  dnsNames:
+  - grafana.mca.ethcero.es
+  secretName: grafanatls-secret
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod

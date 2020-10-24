@@ -1,7 +1,7 @@
 config:
   target: "http://localhost:8080"
   phases:
-    - arrivalRate: 300
+    - arrivalRate: 100
 scenarios:
   - flow:
       - post:

@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-replicaset-exporter
+  labels:
+    app.kubernetes.io/name: prometheus-replicaset-exporter
+    app.kubernetes.io/instance: prometheus-replicaset-exporter
+  namespace: tfm
+spec:
+  endpoints:
+  - port: metrics
+    interval: 5s
+    scrapeTimeout: 4s
+  namespaceSelector:
+    matchNames:
+    - tfm
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-replicaset-exporter
+      app.kubernetes.io/instance: prometheus-replicaset-exporter

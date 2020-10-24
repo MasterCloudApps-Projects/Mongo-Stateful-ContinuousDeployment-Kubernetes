@@ -1,38 +1,99 @@
-# Mongo-Stateful-ContinuousDeployment-Kubernetes
+# MongoDB replicaset en Kubernetes
+
+Este repositorio analiza las diferentes opciones que podemos usar en Kubernetes para desplegar aplicaciones con estado. Usaremos MongoDB para crear un cluster en modo [ReplicaSet](https://docs.mongodb.com/manual/replication/).
 
 ## Asunciones
 
-### Local path provisioner
+Partimos de la base de que disponemos de un cluster Kubernetes en cualquiera de sus variantes. Se puede usar Minikube o Microk8s para trabajar en local o bien cualquier servicio Kubernetes que ofrecen proveedores cloud como Amazon Web Services o Google Platform.
+
+El sistema de monitorización compuesto por Grafana y Prometheus y su instalación quedan fuera del ámbito de este proyecto.
+
+Vaya a [Infra](infra/README.md) para los detalles de la infraestructura usada para estas pruebas.
+
+## Servicios
+
+### Dummy Service
+
+Se pretende observar el comportamiento del cluster de MongoDB en un entorno de simulación con carga de trabajo.
+
+Para ello se desarrolla una aplicación en NodeJs que expone una simple API REST con un solo endpoint `POST /` que almacena en la base de datos cualquier objeto JSON que se incluya en el *body* de la petición.
+
+El servicio expone métricas en formato Prometheus en `/metrics` para poder obtener información sobre el rendimiendo de la aplicación.
+
+```bash
+# HELP dummy_service_concurrent_requests Incoming requests
+# TYPE dummy_service_concurrent_requests gauge
+dummy_service_concurrent_requests 0
+
+# HELP dummy_service_requests_total Incoming requests
+# TYPE dummy_service_requests_total counter
+dummy_service_requests_total 0
+
+# HELP dummy_service_requests_stored_total Incoming stored requests
+# TYPE dummy_service_requests_stored_total counter
+dummy_service_requests_stored_total 0
+
+# HELP dummy_service_requests_error_storing_total Incoming not stored requests
+# TYPE dummy_service_requests_error_storing_total counter
+dummy_service_requests_error_storing_total 0
+
+# HELP dummy_service_request_duration_seconds request duration summary
+# TYPE dummy_service_request_duration_seconds summary
+dummy_service_request_duration_seconds{quantile="0.01"} 0
+dummy_service_request_duration_seconds{quantile="0.05"} 0
+dummy_service_request_duration_seconds{quantile="0.5"} 0
+dummy_service_request_duration_seconds{quantile="0.9"} 0
+dummy_service_request_duration_seconds{quantile="0.95"} 0
+dummy_service_request_duration_seconds{quantile="0.99"} 0
+dummy_service_request_duration_seconds{quantile="0.999"} 0
+dummy_service_request_duration_seconds_sum 0
+dummy_service_request_duration_seconds_count 0
+```
+
+### Replicaset Exporter
+
+Replicaset Exporter es un *Exporter* de Prometheus que se encarga de monitorizar el cluster de MongoDB y exponer métricas sobre su estado.
+
+```bash
+# HELP mongodb_replset_member_health MongoDB replicaSet Member Health
+# TYPE mongodb_replset_member_health gauge
+mongodb_replset_member_health{name="mongo-0.mongo-svc.tfm.svc.cluster.local:27017"} 1
+mongodb_replset_member_health{name="mongo-1.mongo-svc.tfm.svc.cluster.local:27017"} 1
+mongodb_replset_member_health{name="mongo-2.mongo-svc.tfm.svc.cluster.local:27017"} 1
+
+# HELP mongodb_replset_member_state MongoDB replicaSet Member state
+# TYPE mongodb_replset_member_state gauge
+mongodb_replset_member_state{name="mongo-0.mongo-svc.tfm.svc.cluster.local:27017"} 2
+mongodb_replset_member_state{name="mongo-1.mongo-svc.tfm.svc.cluster.local:27017"} 2
+mongodb_replset_member_state{name="mongo-2.mongo-svc.tfm.svc.cluster.local:27017"} 1
+
+# HELP mongodb_replset_member_downtime_total MongoDB replicaSet Member total down time
+# TYPE mongodb_replset_member_downtime_total gauge
+mongodb_replset_member_downtime_total{name="mongo-0.mongo-svc.tfm.svc.cluster.local:27017"} 0
+mongodb_replset_member_downtime_total{name="mongo-1.mongo-svc.tfm.svc.cluster.local:27017"} 0
+mongodb_replset_member_downtime_total{name="mongo-2.mongo-svc.tfm.svc.cluster.local:27017"} 0
+```
+
+## Despliegue de MongoDB
+
+### Despliegue con Statefulset
+
+En el directorio [k8s-mongo-statefulset](k8s-mongo-statefulset) se encuentran los recursos para crear un cluster de MongoDB en modo *ReplicaSet* haciendo uso del recurso **StatefulSet** de Kubernetes.
+
+### Despliegue con Mongo Operator
+
+En el directorio [k8s-mongo-operator](k8s-mongo-operator) se encuentran los recursos para crear un cluster haciendo uso del operador de MongoDB para Kubernetes [MongoDB Community Kubernetes Operator](https://github.com/mongodb/mongodb-kubernetes-operator)
+
+## Extra
+
+### Actualizar imagen de MongoDB
 
 ```
-kubectl --kubeconfig .kubeconfig apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-kubectl --kubeconfig .kubeconfig patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl --kubeconfig=.kubeconfig set image statefulset mongo mongo=mongo:4.4
+ktfm rollout status statefulset mongo
 ```
-### MongoDB repicaset Chart
-```
-kubectl --kubeconfig .kubeconfig create ns mongodb-tfm
-helm --kubeconfig .kubeconfig repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm --kubeconfig .kubeconfig -n mongodb-tfm install -f values.yaml mongodb-replicaset stable/mongodb-replicaset
-helm --kubeconfig .kubeconfig upgrade -f values.yaml mongodb-replicaset stable/mongodb-replicaset
-```
-
-1. After the statefulset is created completely, one can check which instance is primary by running:
-
-    $ for ((i = 0; i < 3; ++i)); do kubectl exec --namespace default mongodb-tfm-mongodb-replicaset-$i -- sh -c 'mongo --eval="printjson(rs.isMaster())"'; done
-
-2. One can insert a key into the primary instance of the mongodb replica set by running the following:
-    MASTER_POD_NAME must be replaced with the name of the master found from the previous step.
-
-    $ kubectl exec --namespace default MASTER_POD_NAME -- mongo --eval="printjson(db.test.insert({key1: 'value1'}))"
-
-3. One can fetch the keys stored in the primary or any of the slave nodes in the following manner.
-    POD_NAME must be replaced by the name of the pod being queried.
-
-    $ kubectl exec --namespace default POD_NAME -- mongo --eval="rs.slaveOk(); db.test.find().forEach(printjson)"
-
 
 ## Referencias
 
-https://kubernetes.io/es/docs/concepts/workloads/controllers/statefulset/#estrategias-de-actualizaci%C3%B3n
-https://github.com/helm/charts/tree/master/stable/mongodb-replicaset
-https://github.com/kubernetes-retired/contrib/tree/master/peer-finder
+* https://kubernetes.io/es/docs/concepts/workloads/controllers/statefulset/#estrategias-de-actualizaci%C3%B3n
+* https://github.com/mongodb/mongodb-kubernetes-operator

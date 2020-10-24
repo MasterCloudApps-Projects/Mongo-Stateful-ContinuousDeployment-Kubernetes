@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+      kubernetes.io/ingress.class: nginx
+  name: dummy-service
+  namespace: tfm
+spec:
+  rules:
+  - host: mca.ethcero.es
+    http:
+      paths:
+      - backend:
+          serviceName: dummy-service
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - mca.ethcero.es
+    secretName: dummy-service-tls-secret
+status:
+  loadBalancer:
+    ingress:
+    - ip: 127.0.0.1

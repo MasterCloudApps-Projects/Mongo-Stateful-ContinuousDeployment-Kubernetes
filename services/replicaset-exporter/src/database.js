@@ -9,7 +9,7 @@ let _db;
 
 async function tryConnect(url, attempts) {
   try {
-
+    console.log('info', 'Connecting to: ' + url)
     client =  await MongoClient.connect(url, {
       useUnifiedTopology: true,
       useNewUrlParser: true
@@ -26,6 +26,10 @@ async function tryConnect(url, attempts) {
       throw Error('Failed to connect to MongoDB')
     }
   }
+}
+
+exports.isConnected = () => {
+  return _db ? true : false
 }
 
 exports.connect = (url) => {

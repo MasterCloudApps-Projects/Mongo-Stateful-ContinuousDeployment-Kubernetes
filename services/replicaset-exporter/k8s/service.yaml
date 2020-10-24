@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  prometheus-replicaset-exporter
+  labels:
+    app.kubernetes.io/name: prometheus-replicaset-exporter
+    app.kubernetes.io/instance: prometheus-replicaset-exporter
+  namespace: tfm
+spec:
+  selector:
+    app.kubernetes.io/name: prometheus-replicaset-exporter
+    app.kubernetes.io/instance: prometheus-replicaset-exporter
+  type: ClusterIP
+  ports:
+  - name:  metrics
+    port:  3000
+    targetPort:  metrics

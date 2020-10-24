@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-replicaset-exporter
+  labels:
+    app.kubernetes.io/name: prometheus-replicaset-exporter
+    app.kubernetes.io/instance: prometheus-replicaset-exporter
+  namespace: tfm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-replicaset-exporter
+      app.kubernetes.io/instance: prometheus-replicaset-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-replicaset-exporter
+        app.kubernetes.io/instance: prometheus-replicaset-exporter
+    spec:
+      containers:
+      - name: replicaset-exporter
+        image: franco87/replicaset-exporter
+        env:
+          - name: MONGODB_URI
+            value: 'mongodb://my-user:test@mongo-svc.tfm.svc.cluster.local:27017/test?authSource=admin&authMechanism=SCRAM-SHA-256&replicaset=mongo'
+        imagePullPolicy: Always
+        ports:
+        - name: metrics
+          containerPort: 3000
+          protocol: TCP

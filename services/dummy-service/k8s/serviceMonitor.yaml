@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-dummy-service
+  labels:
+    app.kubernetes.io/name: dummy-service
+    app.kubernetes.io/instance: dummy-service
+  namespace: tfm
+spec:
+  endpoints:
+  - port: http-alt
+    interval: 5s
+    scrapeTimeout: 4s
+  namespaceSelector:
+    matchNames:
+    - tfm
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dummy-service
+      app.kubernetes.io/instance: dummy-service

@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+      kubernetes.io/ingress.class: nginx
+  name: prom-grafana
+  namespace: monitoring
+spec:
+  rules:
+  - host: grafana.mca.ethcero.es
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus-operator-grafana
+          servicePort: 80
+        path: /
+  - host: prometheus.mca.ethcero.es
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus-operator-prometheus
+          servicePort: 9090
+        path: /
+  tls:
+  - hosts:
+      - grafana.mca.ethcero.es
+      - prometheus.mca.ethcero.es
+    secretName: grafanatls-secret
