@@ -33,7 +33,7 @@ Crearemos un cluster de 3 réplicas para observar el comportamiento del Stateful
 
 ## Configurando la replicación de MongoDB
 
-Un cluster *replica set* de Mongo requiere de una configuración específica que debe ser provisionada en tiempo de instalación. En esta configuración se debe especificar que se está creando un cluster *replicaset* y hay que proveer concreatamente qué nodos van a formar parte del cluster.
+Un cluster *replica set* de Mongo requiere de una configuración específica que debe ser provisionada en tiempo de instalación. En esta configuración se debe especificar que se está creando un cluster *replicaset* y hay que proveer concretamente qué nodos van a formar parte del cluster.
 
 Se obta por la opción de crear un *Job* de inicialización del cluster que ejecutará unos comando de Mongo para inicializar el cluster.
 
@@ -98,13 +98,13 @@ El controlador Statefulset soporta actualizaciones automáticas de la aplicació
 
 Existen 2 estrategias de actualización. `RollingUpdate`y `OnDelete`
 
-### Rolling Update
+### Rolling Update
 
 La estrategia `RollingUpdate` actualiza todos los Pods del StatefulSet de forma ordenada y hacia atras en base al ordinal asignado a cada Pod. El controlador finaliza cada Pod y espera a que transicione de estado a Running y Ready antes de actualizar el siguiente Pod.
 
 #### Despliegues Canary
 
-Rolling Updates tiene una característica que permite realizar actualizaciones **Canary* creando particiones de Pods usando el atributo `spec.updateStrategy.partition`.
+Rolling Updates tiene una característica que permite realizar actualizaciones *Canary* creando particiones de Pods usando el atributo `spec.updateStrategy.partition`.
 
 Se establece un valor numérico en el cual la actualización se detendrá y nos permitirá evaluar si la actualización está siendo exitosa. En un StatefulSet de 4 nodos, establecemos `partition` a 2 y tras aplicar la actualización de imagen en `spec.containers` el controlador comenzará a realizar la actualización de atras hacia delante hasta llegar al Pod con el ordinal especificado en `partition` y se detendrá. Podremos evaluar si ha sido exitosa y si queremos finalizar el proceso, estableceremos `partition` a 0 para que el controlador continue con los Pods pendientes de actualización.
 
@@ -299,4 +299,4 @@ Summary report @ 17:40:34(+0100) 2020-11-03
 
 ### Conclusiones
 
-El uso de StatefulSet obligatorio para desplegar un cluster de MongoDB en modo replicación por sus capacidades de proveer identidades únicas a las réplicas pero el uso de la estrategia de actualización `RollingUpdate` hace que sea poco viable implementar despliegue continuo en un entorno de producción de alto rendimiento ya que provoca degradaciones de servicio en hasta un 480% en el tiempo de respuesta de las peticiones.
+El uso de StatefulSet es obligatorio para desplegar un cluster de MongoDB en modo replicación por sus capacidades de proveer identidades únicas y permanentes a las réplicas pero el uso de la estrategia de actualización `RollingUpdate` hace que sea poco viable implementar despliegue continuo en un entorno de producción de alto rendimiento ya que provoca degradaciones de servicio de hasta un 480% en el tiempo de respuesta de las peticiones.
