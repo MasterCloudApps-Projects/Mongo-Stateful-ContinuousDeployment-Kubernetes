@@ -56,14 +56,11 @@ helm --kubeconfig=.kubeconfig install \
 kubectl --kubeconfig .kubeconfig apply -f letsencrypt-prod.yaml -f letsencrypt-staging.yaml
 ```
 
-
 ## Monitoring
 
 El sistema de monitorización está compuesto por la tupla **Prometheus** y **Grafana**.
 
 Se usa **Helm** para instalar el sistema completo de una forma sencilla.
-
-* []
 
 Instalar [prometheus-operator](https://github.com/prometheus-community/helm-charts) en el **namespace** *monitoring*:
 

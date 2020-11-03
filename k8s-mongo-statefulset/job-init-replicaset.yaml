@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mongo-db-cm
+  namespace: tfm
 data:
   replicaset.js: |
     rs.initiate({ _id: "mongo", version: 1, members: [
@@ -25,6 +26,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name:  init-replicaset
+  namespace: tfm
 spec:
   template:
     metadata:

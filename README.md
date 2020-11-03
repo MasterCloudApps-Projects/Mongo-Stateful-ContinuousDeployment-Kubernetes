@@ -80,18 +80,13 @@ mongodb_replset_member_downtime_total{name="mongo-2.mongo-svc.tfm.svc.cluster.lo
 
 En el directorio [k8s-mongo-statefulset](k8s-mongo-statefulset) se encuentran los recursos para crear un cluster de MongoDB en modo *ReplicaSet* haciendo uso del recurso **StatefulSet** de Kubernetes.
 
+[Despliegue con Statefulset](k8s-mongo-statefulset/README.md)
+
+
 ### Despliegue con Mongo Operator
 
 En el directorio [k8s-mongo-operator](k8s-mongo-operator) se encuentran los recursos para crear un cluster haciendo uso del operador de MongoDB para Kubernetes [MongoDB Community Kubernetes Operator](https://github.com/mongodb/mongodb-kubernetes-operator)
 
-## Extra
-
-### Actualizar imagen de MongoDB
-
-```
-kubectl --kubeconfig=.kubeconfig set image statefulset mongo mongo=mongo:4.4
-ktfm rollout status statefulset mongo
-```
 
 ## Referencias
 
