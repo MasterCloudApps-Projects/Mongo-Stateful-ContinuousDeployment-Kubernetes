@@ -251,6 +251,8 @@ Con una carga de 50 peticiones por segundo, el comportamiento es muy similar a l
 
 En esta prueba llevamos al servidor al límite de capacidad de sus recursos y vemos como algunas peticiones comienzan a fallar con el código 502 y vemos como las gráficas no son tan planas como los casos anteriores.
 
+> Los codigos de error 502 son debidos a la limitación de recursos del servidor donde está alojado el cluster K8s. En ningún caso son producto de las pruebas de despliegue continuo de MongoDB.
+
 ```
 All virtual users finished
 Summary report @ 17:36:00(+0100) 2020-11-03
@@ -273,7 +275,7 @@ Summary report @ 17:36:00(+0100) 2020-11-03
 
 ![](images/muestra_100_sec.png)
 
-**Actualización Mongo 50 reqs/sec durante 2 minutos:**
+**Actualización Mongo 100 reqs/sec durante 2 minutos:**
 
 ```
 All virtual users finished
@@ -300,3 +302,5 @@ Summary report @ 17:40:34(+0100) 2020-11-03
 ### Conclusiones
 
 El uso de StatefulSet es obligatorio para desplegar un cluster de MongoDB en modo replicación por sus capacidades de proveer identidades únicas y permanentes a las réplicas pero el uso de la estrategia de actualización `RollingUpdate` hace que sea poco viable implementar despliegue continuo en un entorno de producción de alto rendimiento ya que provoca degradaciones de servicio de hasta un 480% en el tiempo de respuesta de las peticiones.
+
+En las pruebas no se observa pérdida de datos ya que todas las peticiones que consiguen alcanzar el servicio son almacenadas en la base de datos tras recuperarse la conexión a esta. Esto es gracias a una caracteristica del driver de MongoDB que provee resiliencia ante pérdidas de conexión en la red. Esto no quiere decir que el método sea infalible, ya que es posible, con un volumen de peticiones elevado, que se produzca un desbordamiento de memoria y el proceso acabe terminando de forma abrupta y con ello se produzca la pérdida de información.

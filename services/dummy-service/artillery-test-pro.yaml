@@ -2,7 +2,7 @@ config:
   target: "https://mca.ethcero.es"
   phases:
     - arrivalRate: 100
-      duration: 120
+      duration: 300
 scenarios:
   - flow:
       - post:
