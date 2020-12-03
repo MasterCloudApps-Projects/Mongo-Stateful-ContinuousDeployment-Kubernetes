@@ -262,17 +262,17 @@ Tras ejecutar el proceso de actualización simulando diferentes cargas de trabaj
 **Muestra base 10 reqs/sec durante 2 minutos:**
 
 ```
-Summary report @ 19:22:32(+0100) 2020-11-22
+Summary report @ 19:45:59(+0100) 2020-12-02
   Scenarios launched:  1200
   Scenarios completed: 1200
   Requests completed:  1200
   Mean response/sec: 9.93
   Response time (msec):
-    min: 528.7
-    max: 11253.5
-    median: 764
-    p95: 3031.7
-    p99: 4686.2
+    min: 548.7
+    max: 2458.5
+    median: 590.9
+    p95: 602.4
+    p99: 724.8
   Scenario counts:
     0: 1200 (100%)
   Codes:
@@ -377,28 +377,6 @@ Summary report @ 20:41:29(+0100) 2020-11-22
   Codes:
     200: 11994
     502: 6
-```
-
-```
-All virtual users finished
-Summary report @ 20:07:58(+0100) 2020-11-25
-  Scenarios launched:  12000
-  Scenarios completed: 11998
-  Requests completed:  11998
-  Mean response/sec: 83.88
-  Response time (msec):
-    min: 591.5
-    max: 60224.6
-    median: 4417.2
-    p95: 9485.3
-    p99: 15009.4
-  Scenario counts:
-    0: 12000 (100%)
-  Codes:
-    200: 11982
-    502: 16
-  Errors:
-    ECONNRESET: 2
 ```
 
 ![](images/op_muestra_100_req_sec.png)
